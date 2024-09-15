@@ -1592,6 +1592,13 @@
     loupe "^3.1.1"
     tinyrainbow "^1.2.0"
 
+"@vitest/web-worker@2.1.1":
+  version "2.1.1"
+  resolved "https://registry.npmjs.org/@vitest/web-worker/-/web-worker-2.1.1.tgz#054c05aefac36231088964ececf9bf473fe2c0bf"
+  integrity sha512-9APtqy5bmpD9l7q6NZ3iN3w3cUd7IBHH5+8VvrwedqItomz7JLeb5Mj0E1Pfh9Jo3thI87ClipY+aL2HROmzfA==
+  dependencies:
+    debug "^4.3.6"
+
 "@webassemblyjs/ast@1.12.1", "@webassemblyjs/ast@^1.12.1":
   version "1.12.1"
   resolved "https://registry.npmjs.org/@webassemblyjs/ast/-/ast-1.12.1.tgz#bb16a0e8b1914f979f45864c23819cc3e3f0d4bb"

@@ -1,5 +1,4 @@
-// import Worker from './worker.ts';
-import Worker from './mine.worker'; 
+// import Worker from './mine.worker'; 
 import { Subject } from 'rxjs';
 
 
@@ -20,7 +19,7 @@ interface ProgressEvent {
 
 interface ErrorEvent {
   error: any;
-  message: string;
+  message?: string;
 }
 
 interface CancelledEvent {
@@ -145,8 +144,9 @@ class Notemine {
 
   private initializeWorkers(): void {
     for (let i = 0; i < this.numberOfWorkers; i++) {
-      const worker = new Worker();
-  
+      // const worker = new Worker();
+      const worker = new Worker(new URL('./mine.worker.ts', import.meta.url))
+
       worker.onmessage = this.handleWorkerMessage.bind(this);
       worker.onerror = this.handleWorkerError.bind(this);
   
@@ -185,7 +185,6 @@ class Notemine {
         }
       }
 
-      // Emit progress event
       this.progressSubject.next({ workerId, hashRate, bestPowData });
     } else if (type === 'result') {
       // Mining succeeded

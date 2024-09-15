@@ -1,8 +1,8 @@
 # notemine js 
 
-[![build](https://img.shields.io/npm/v/notemine)](https://www.npmjs.com/package/notemine)
-[![build](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)]([https://github.com/sandwichfarm/notemine-js/actions](https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml))
-[![test](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)](https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml)
+[![npm](https://img.shields.io/npm/v/notemine)]( https://www.npmjs.com/package/notemine )
+[![build](https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml ) 
+[![test](https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml )
 
 a module that wraps [notemine](https://github.com/sandwichfarm/notemine) as observables for use in modern web applications.
 

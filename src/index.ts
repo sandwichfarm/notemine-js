@@ -1,6 +1,4 @@
-// import Worker from './mine.worker'; 
 import { Subject } from 'rxjs';
-
 
 interface MinerOptions {
   content?: string;
@@ -95,12 +93,6 @@ class Notemine {
     this.publicKey = publicKey;
   }
 
-  sign(privateKey: string): void {
-    // Implement signing logic using privateKey
-    // This is a placeholder; you'll need to integrate with a Nostr library
-    // that can sign events using the private key.
-  }
-
   mine(): void {
     if (this.mining) return;
 
@@ -132,28 +124,15 @@ class Notemine {
     this.cancelledSubject.next({ reason: 'Mining cancelled by user.' });
   }
 
-  async publish(): Promise<void> {
-    if (!this.result) {
-      throw new Error('No mined result to publish.');
-    }
-
-    // Implement publishing logic to Nostr relays
-    // This is a placeholder; you'll need to integrate with a Nostr library
-    // that can publish events to relays.
-  }
-
   private initializeWorkers(): void {
     for (let i = 0; i < this.numberOfWorkers; i++) {
-      // const worker = new Worker();
       const worker = new Worker(new URL('./mine.worker.ts', import.meta.url))
 
       worker.onmessage = this.handleWorkerMessage.bind(this);
       worker.onerror = this.handleWorkerError.bind(this);
   
-      // Prepare the event data
       const event = this.prepareEvent();
   
-      // Send the mining message to the worker
       worker.postMessage({
         type: 'mine',
         event,
@@ -170,11 +149,11 @@ class Notemine {
     const { type, workerId, hashRate, bestPowData } = data;
 
     if (type === 'progress') {
-      // Update worker's best PoW data
+
       if (bestPowData) {
         this.workersPow[workerId] = bestPowData;
 
-        // Update highest PoW
+
         if (!this.highestPow || bestPowData.best_pow > this.highestPow.bestPow) {
           this.highestPow = {
             bestPow: bestPowData.best_pow,
@@ -187,24 +166,19 @@ class Notemine {
 
       this.progressSubject.next({ workerId, hashRate, bestPowData });
     } else if (type === 'result') {
-      // Mining succeeded
+
       this.result = data.data;
       this.mining = false;
 
-      // Terminate all workers
       this.workers.forEach(worker => worker.terminate());
 
-      
-      // Emit success event
       this.successSubject.next({ result: this.result });
     } else if (type === 'error') {
-      // Handle error from worker
       this.errorSubject.next({ error: data.error });
     }
   }
 
   private handleWorkerError(e: ErrorEvent): void {
-    // Emit error event
     this.errorSubject.next({ error: e.error || e.message });
   }
 

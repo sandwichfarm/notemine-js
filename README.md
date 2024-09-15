@@ -5,7 +5,7 @@
 ![test](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 ![coverage](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 
-a module for implementing [notemine](https://github.com/sandwichfarm/notemine) wasm nostr event miner in modern web applications with observables.
+a module that wraps [notemine](https://github.com/sandwichfarm/notemine) as observables for use in modern web applications.
 
 ## install
 package name: `notemine`

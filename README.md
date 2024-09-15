@@ -1,11 +1,10 @@
-# notemine js 
+# note⛏️ (js)
 
-![build](https://img.shields.io/npm/v/notemine)
-![build](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
-![test](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
-![coverage](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+[![npm](https://img.shields.io/npm/v/notemine)]( https://www.npmjs.com/package/notemine )
+[![build](https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml ) 
+[![test](https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml )
 
-a module for implementing [notemine](https://github.com/sandwichfarm/notemine) wasm nostr event miner in modern web applications with observables.
+`notemine` is a typescript module that wraps [notemine](https://github.com/sandwichfarm/notemine) `wasm-bindgen` interfaces. More convenient and has added observables for more consistent use throughout modern web stacks. 
 
 ## install
 package name: `notemine`
@@ -42,12 +41,12 @@ _untested_
   const tags = [ "#t", "introduction"]
   const pubkey = "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f"
 
-  //set options for miner 
+  //set options for notemine 
   const difficulty = 21
   const numberOfWorkers = 7
  
 
-  const noteminer = new Noteminer({
+  const notemine = new Notemine({
     content,
     tags,
     difficulty,
@@ -55,18 +54,18 @@ _untested_
   })
 
   //you can also set content, tags and pubkey via assessors after initialization. 
-  noteminer.pubkey = pubkey
+  notemine.pubkey = pubkey
 
-  //start miner
-  noteminer.mine()
+  //start notemine
+  notemine.mine()
 ```
 
-Updates to noteminer can be accessed via observables.
+Updates to notemine can be accessed via observables.
 ```
-noteminer.progress$
-noteminer.error$
-noteminer.progress$
-noteminer.progress$
+notemine.progress$
+notemine.error$
+notemine.cancelled$
+notemine.success$
 ```
 
 
@@ -78,29 +77,40 @@ noteminer.progress$
 <script lang="ts">
   import { onMount } from 'svelte';
   import { type Writable, writable } from 'svelte/store'
-  import { type ProgressEvent, NostrMiner } from 'nostr-miner';
+  import { type ProgressEvent, Notemine } from 'notemine';
 
   const numberOfMiners = 8
-  let miner: NostrMiner;
+  let notemine: Notemine;
   let progress: Writable<ProgressEvent[]> = new writable(new Array(numberOfMiners))
+  let success: Writeable<SuccessEvent> = new writable(null)
 
   onMount(() => {
-    miner = new NostrMiner({ content: 'Hello, Nostr!', numberOfMiners  });
+    notemine = new Notemine({ content: 'Hello, Nostr!', numberOfMiners  });
 
-    const subscription = miner.progress$.subscribe(progress_ => {
+    const progress$ = miner.progress$.subscribe(progress_ => {
       progress.update( _progress => {
         _progress[progress_.workerId] = progress_
+        return _progress
       })
     });
 
-    miner.mine();
+    const success$ = miner.progress$.subscribe(success_ => {
+      const {event, totalTime, hashRate}
+      success.update( _success => {
+        _success = success_
+        return _success
+      })
+      miner.cancel();
+    });
+
+    notemine.mine();
 
     return () => {
-      subscription.unsubscribe();
+      progress$.unsubscribe();
+      success$.unsubscribe();
       miner.cancel();
     };
   });
-
   $: miners = $progress
 </script>
 
@@ -109,6 +119,12 @@ noteminer.progress$
 {#each $miners as miner}
 <span>Miner #{miner.workerId}: {miner.hashRate}kH/s [Best PoW: ${miner.bestPowData}]
 {/each}
+
+{#if($success !== null)}
+  <pre>
+  {$success.event}
+  </pre>
+{/if}
 
 </div>
 ```
@@ -121,21 +137,21 @@ noteminer.progress$
 
 ```reactjs
   import React, { useEffect } from 'react';
-  import { NostrMiner } from 'nostr-miner';
+  import { Notemine } from 'notemine';
 
   const MyComponent = () => {
-    const miner = new NostrMiner({ content: 'Hello, Nostr!' });
+    const notemine = new Notemine({ content: 'Hello, Nostr!' });
 
     useEffect(() => {
-      const subscription = miner.progress$.subscribe(progress => {
-        // Update progress bar or display miner's progress
+      const subscription = notemine.progress$.subscribe(progress => {
+        // Update progress bar or display notemine's progress
       });
 
-      miner.mine();
+      notemine.mine();
 
       return () => {
         subscription.unsubscribe();
-        miner.cancel();
+        notemine.cancel();
       };
     }, []);
 
@@ -161,23 +177,23 @@ noteminer.progress$
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted } from 'vue';
-import { NostrMiner } from 'nostr-miner';
+import { Notemine } from 'notemine';
 
 export default defineComponent({
   name: 'MinerComponent',
   setup() {
-    const miner = new NostrMiner({ content: 'Hello, Nostr!' });
+    const notemine = new Notemine({ content: 'Hello, Nostr!' });
 
     onMounted(() => {
-      const subscription = miner.progress$.subscribe(progress => {
-        // Update progress bar or display miner's progress
+      const subscription = notemine.progress$.subscribe(progress => {
+        // Update progress bar or display notemine's progress
       });
 
-      miner.mine();
+      notemine.mine();
 
       onUnmounted(() => {
         subscription.unsubscribe();
-        miner.cancel();
+        notemine.cancel();
       });
     });
 
@@ -194,29 +210,29 @@ export default defineComponent({
 
 ```javascript
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NostrMiner } from 'nostr-miner';
+import { Notemine } from 'notemine';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-miner',
-  templateUrl: './miner.component.html',
+  selector: 'app-notemine',
+  templateUrl: './notemine.component.html',
 })
 export class MinerComponent implements OnInit, OnDestroy {
-  miner: NostrMiner;
+  notemine: Notemine;
   progressSubscription: Subscription;
 
   ngOnInit() {
-    this.miner = new NostrMiner({ content: 'Hello, Nostr!' });
-    this.progressSubscription = this.miner.progress$.subscribe(progress => {
-      // Update progress bar or display miner's progress
+    this.notemine = new Notemine({ content: 'Hello, Nostr!' });
+    this.progressSubscription = this.notemine.progress$.subscribe(progress => {
+      // Update progress bar or display notemine's progress
     });
 
-    this.miner.mine();
+    this.notemine.mine();
   }
 
   ngOnDestroy() {
     this.progressSubscription.unsubscribe();
-    this.miner.cancel();
+    this.notemine.cancel();
   }
 }
 ```

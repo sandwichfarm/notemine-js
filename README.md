@@ -60,12 +60,12 @@ _untested_
   noteminer.mine()
 ```
 
-Updates to noteminer can be accessed via observables.
+Updates to notemine can be accessed via observables.
 ```
-noteminer.progress$
-noteminer.error$
-noteminer.progress$
-noteminer.progress$
+notemine.progress$
+notemine.error$
+notemine.progress$
+notemine.progress$
 ```
 
 

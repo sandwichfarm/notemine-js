@@ -1,0 +1,52 @@
+name: Deploy Demo to GitHub Pages
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Delete demo/pkg symlink
+        run: rm -fr demo/pkg
+
+      - name: Setup Rust Toolchain
+        uses: actions-rust-lang/setup-rust@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        uses: qmaru/wasm-pack-action@v0.5.0
+        with:
+          version: '0.11.1'
+
+      - name: Build Rust Miner
+        run: |
+          bash ./scripts/build-notemine-wasm.sh 
+
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '20'
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Build with Webpack
+        run: yarn build

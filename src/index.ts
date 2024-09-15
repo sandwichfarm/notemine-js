@@ -3,10 +3,9 @@ import { Subject } from 'rxjs';
 interface MinerOptions {
   content?: string;
   tags?: string[][];
-  publicKey?: string;
+  pubkey?: string;
   difficulty?: number;
   numberOfWorkers?: number;
-  relayUrls?: string[];
 }
 
 interface ProgressEvent {
@@ -46,12 +45,12 @@ interface MinedResult {
 
 class Notemine {
   // Configuration
-  private content: string;
-  private tags: string[][];
-  private publicKey: string;
-  private difficulty: number;
-  private numberOfWorkers: number;
-  private relayUrls: string[];
+  private _content: string;
+  private _tags: string[][];
+  private _pubkey: string;
+  private _difficulty: number;
+  private _numberOfWorkers: number;
+  static _defaultTags: string[][] = [['miner', 'notemine']];
 
   // State
   public mining: boolean = false;
@@ -73,30 +72,57 @@ class Notemine {
   public success$ = this.successSubject.asObservable();
 
   constructor(options?: MinerOptions) {
-    this.content = options?.content || '';
-    this.tags = options?.tags || [];
-    this.publicKey = options?.publicKey || '';
-    this.difficulty = options?.difficulty || 20;
-    this.numberOfWorkers = options?.numberOfWorkers || navigator.hardwareConcurrency || 4;
-    this.relayUrls = options?.relayUrls || [];
+    this._content = options?.content || '';
+    this._tags = [...Notemine._defaultTags, ...options?.tags || []];
+    this._pubkey = options?.pubkey || '';
+    this._difficulty = options?.difficulty || 20;
+    this._numberOfWorkers = options?.numberOfWorkers || navigator.hardwareConcurrency || 4;
   }
 
-  setContent(content: string): void {
-    this.content = content;
+  set content(content: string) {
+    this._content = content;
   }
 
-  setTags(tags: string[][]): void {
-    this.tags = tags;
+  get content(): string {
+    return this._content;
   }
 
-  setPubkey(publicKey: string): void {
-    this.publicKey = publicKey;
+  set tags(tags: string[][]) {
+    this._tags = [...this._tags, ...tags];
   }
+
+  get tags(): string[][] {
+    return this._tags;
+  }
+
+  set pubkey(pubkey: string) {
+    this._pubkey = pubkey;
+  }
+
+  get pubkey(): string {
+    return this._pubkey;
+  }
+
+  // set difficulty(difficulty: number) {
+  //   this._difficulty = difficulty;
+  // }
+
+  // get difficulty(): number {
+  //   return this._difficulty;
+  // }
+
+  // set numberOfWorkers(numberOfWorkers: number) {
+  //   this._numberOfWorkers = numberOfWorkers;
+  // }
+
+  // get numberOfWorkers(): number {
+  //   return this._numberOfWorkers;
+  // }
 
   mine(): void {
     if (this.mining) return;
 
-    if (!this.publicKey) {
+    if (!this.pubkey) {
       throw new Error('Public key is not set.');
     }
 
@@ -112,6 +138,10 @@ class Notemine {
     this.highestPow = null;
 
     this.initializeWorkers();
+  }
+
+  stop(): void {
+    this.cancel();
   }
 
   cancel(): void {
@@ -184,7 +214,7 @@ class Notemine {
 
   private prepareEvent(): string {
     const event = {
-      pubkey: this.publicKey,
+      pubkey: this.pubkey,
       kind: 1,
       tags: this.tags,
       content: this.content,

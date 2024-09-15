@@ -8,7 +8,7 @@ describe('Notemine', () => {
   beforeEach(() => {
     miner = new Notemine({
       content: 'Test content',
-      publicKey: 'testpublickey',
+      pubkey: 'testpublickey',
       difficulty: 20,
       numberOfWorkers: 2,
     });
@@ -21,18 +21,18 @@ describe('Notemine', () => {
   });
 
   it('should set content', () => {
-    miner.setContent('New content');
+    miner.content = 'New content';
     expect((miner as any).content).toBe('New content');
   });
 
   it('should set tags', () => {
-    miner.setTags([['tag1', 'value1']]);
+    miner.tags = [['tag1', 'value1']];
     expect((miner as any).tags).toEqual([['tag1', 'value1']]);
   });
 
   it('should set public key', () => {
-    miner.setPubkey('newpublickey');
-    expect((miner as any).publicKey).toBe('newpublickey');
+    miner.pubkey = 'newpublickey'
+    expect((miner as any).pubkey).toBe('newpublickey');
   });
 
   it('should start mining', () => {

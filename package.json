@@ -1,6 +1,6 @@
 {
   "name": "notemine",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "nostr note miner wrapper for notemine wasm",
   "repository": "https://github.com/sandwichfarm/notemine-js",
   "author": "sandwich.farm",

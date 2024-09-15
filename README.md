@@ -1,10 +1,10 @@
-# notemine js 
+# note⛏️ (js)
 
 [![npm](https://img.shields.io/npm/v/notemine)]( https://www.npmjs.com/package/notemine )
 [![build](https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml ) 
 [![test](https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml )
 
-a module that wraps [notemine](https://github.com/sandwichfarm/notemine) as observables for use in modern web applications.
+a typescript module that wraps [notemine](https://github.com/sandwichfarm/notemine) `wasm-bindgen` interfaces. More convenient and has added observables for more consistent use throughout modern web stacks. 
 
 ## install
 package name: `notemine`

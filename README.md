@@ -1,11 +1,10 @@
-# notemine js 
+# note⛏️ (js)
 
-![build](https://img.shields.io/npm/v/notemine)
-![build](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
-![test](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
-![coverage](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+[![npm](https://img.shields.io/npm/v/notemine)]( https://www.npmjs.com/package/notemine )
+[![build](https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml ) 
+[![test](https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml )
 
-a module for implementing [notemine](https://github.com/sandwichfarm/notemine) wasm nostr event miner in modern web applications with observables.
+`notemine` is a typescript module that wraps [notemine](https://github.com/sandwichfarm/notemine) `wasm-bindgen` interfaces. More convenient and has added observables for more consistent use throughout modern web stacks. 
 
 ## install
 package name: `notemine`
@@ -47,7 +46,7 @@ _untested_
   const numberOfWorkers = 7
  
 
-  const noteminer = new Noteminer({
+  const notemine = new Notemine({
     content,
     tags,
     difficulty,
@@ -55,18 +54,18 @@ _untested_
   })
 
   //you can also set content, tags and pubkey via assessors after initialization. 
-  noteminer.pubkey = pubkey
+  notemine.pubkey = pubkey
 
   //start miner
-  noteminer.mine()
+  notemine.mine()
 ```
 
-Updates to noteminer can be accessed via observables.
+Updates to notemine can be accessed via observables.
 ```
-noteminer.progress$
-noteminer.error$
-noteminer.progress$
-noteminer.progress$
+notemine.progress$
+notemine.error$
+notemine.progress$
+notemine.progress$
 ```
 
 

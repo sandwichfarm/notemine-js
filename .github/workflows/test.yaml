@@ -1,9 +1,14 @@
-name: Deploy Demo to GitHub Pages
+name: test
 
 on:
   push:
     branches: ["master"]
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - build
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -19,14 +24,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: notemine-build
+          path: ./
 
-      - name: Install
-        run: yarn install
-
-      - name: Webpack
-        run: yarn build
-
-      - name: Vitest 
+      - name: vitest
         run: yarn test

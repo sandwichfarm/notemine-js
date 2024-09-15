@@ -46,7 +46,7 @@ _untested_
   const numberOfWorkers = 7
  
 
-  const noteminer = new Noteminer({
+  const notemine = new Notemine({
     content,
     tags,
     difficulty,
@@ -54,10 +54,10 @@ _untested_
   })
 
   //you can also set content, tags and pubkey via assessors after initialization. 
-  noteminer.pubkey = pubkey
+  notemine.pubkey = pubkey
 
   //start miner
-  noteminer.mine()
+  notemine.mine()
 ```
 
 Updates to notemine can be accessed via observables.

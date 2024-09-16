@@ -41,7 +41,7 @@ _untested_
   const tags = [ "#t", "introduction"]
   const pubkey = "e771af0b05c8e95fcdf6feb3500544d2fb1ccd384788e9f490bb3ee28e8ed66f"
 
-  //set options for miner 
+  //set options for notemine 
   const difficulty = 21
   const numberOfWorkers = 7
  
@@ -56,7 +56,7 @@ _untested_
   //you can also set content, tags and pubkey via assessors after initialization. 
   notemine.pubkey = pubkey
 
-  //start miner
+  //start notemine
   notemine.mine()
 ```
 
@@ -77,26 +77,26 @@ notemine.progress$
 <script lang="ts">
   import { onMount } from 'svelte';
   import { type Writable, writable } from 'svelte/store'
-  import { type ProgressEvent, NostrMiner } from 'nostr-miner';
+  import { type ProgressEvent, Notemine } from 'notemine';
 
   const numberOfMiners = 8
-  let miner: NostrMiner;
+  let notemine: Notemine;
   let progress: Writable<ProgressEvent[]> = new writable(new Array(numberOfMiners))
 
   onMount(() => {
-    miner = new NostrMiner({ content: 'Hello, Nostr!', numberOfMiners  });
+    notemine = new Notemine({ content: 'Hello, Nostr!', numberOfMiners  });
 
-    const subscription = miner.progress$.subscribe(progress_ => {
+    const subscription = notemine.progress$.subscribe(progress_ => {
       progress.update( _progress => {
         _progress[progress_.workerId] = progress_
       })
     });
 
-    miner.mine();
+    notemine.mine();
 
     return () => {
       subscription.unsubscribe();
-      miner.cancel();
+      notemine.cancel();
     };
   });
 
@@ -120,21 +120,21 @@ notemine.progress$
 
 ```reactjs
   import React, { useEffect } from 'react';
-  import { NostrMiner } from 'nostr-miner';
+  import { Notemine } from 'notemine';
 
   const MyComponent = () => {
-    const miner = new NostrMiner({ content: 'Hello, Nostr!' });
+    const notemine = new Notemine({ content: 'Hello, Nostr!' });
 
     useEffect(() => {
-      const subscription = miner.progress$.subscribe(progress => {
-        // Update progress bar or display miner's progress
+      const subscription = notemine.progress$.subscribe(progress => {
+        // Update progress bar or display notemine's progress
       });
 
-      miner.mine();
+      notemine.mine();
 
       return () => {
         subscription.unsubscribe();
-        miner.cancel();
+        notemine.cancel();
       };
     }, []);
 
@@ -160,23 +160,23 @@ notemine.progress$
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted } from 'vue';
-import { NostrMiner } from 'nostr-miner';
+import { Notemine } from 'notemine';
 
 export default defineComponent({
   name: 'MinerComponent',
   setup() {
-    const miner = new NostrMiner({ content: 'Hello, Nostr!' });
+    const notemine = new Notemine({ content: 'Hello, Nostr!' });
 
     onMounted(() => {
-      const subscription = miner.progress$.subscribe(progress => {
-        // Update progress bar or display miner's progress
+      const subscription = notemine.progress$.subscribe(progress => {
+        // Update progress bar or display notemine's progress
       });
 
-      miner.mine();
+      notemine.mine();
 
       onUnmounted(() => {
         subscription.unsubscribe();
-        miner.cancel();
+        notemine.cancel();
       });
     });
 
@@ -193,29 +193,29 @@ export default defineComponent({
 
 ```javascript
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NostrMiner } from 'nostr-miner';
+import { Notemine } from 'notemine';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-miner',
-  templateUrl: './miner.component.html',
+  selector: 'app-notemine',
+  templateUrl: './notemine.component.html',
 })
 export class MinerComponent implements OnInit, OnDestroy {
-  miner: NostrMiner;
+  notemine: Notemine;
   progressSubscription: Subscription;
 
   ngOnInit() {
-    this.miner = new NostrMiner({ content: 'Hello, Nostr!' });
-    this.progressSubscription = this.miner.progress$.subscribe(progress => {
-      // Update progress bar or display miner's progress
+    this.notemine = new Notemine({ content: 'Hello, Nostr!' });
+    this.progressSubscription = this.notemine.progress$.subscribe(progress => {
+      // Update progress bar or display notemine's progress
     });
 
-    this.miner.mine();
+    this.notemine.mine();
   }
 
   ngOnDestroy() {
     this.progressSubscription.unsubscribe();
-    this.miner.cancel();
+    this.notemine.cancel();
   }
 }
 ```

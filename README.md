@@ -64,8 +64,8 @@ Updates to notemine can be accessed via observables.
 ```
 notemine.progress$
 notemine.error$
-notemine.progress$
-notemine.progress$
+notemine.cancelled$
+notemine.success$
 ```
 
 
@@ -82,24 +82,35 @@ notemine.progress$
   const numberOfMiners = 8
   let miner: NostrMiner;
   let progress: Writable<ProgressEvent[]> = new writable(new Array(numberOfMiners))
+  let success: Writeable<SuccessEvent> = new writable(null)
 
   onMount(() => {
     miner = new NostrMiner({ content: 'Hello, Nostr!', numberOfMiners  });
 
-    const subscription = miner.progress$.subscribe(progress_ => {
+    const progress$ = miner.progress$.subscribe(progress_ => {
       progress.update( _progress => {
         _progress[progress_.workerId] = progress_
+        return _progress
       })
+    });
+
+    const success$ = miner.progress$.subscribe(success_ => {
+      const {event, totalTime, hashRate}
+      success.update( _success => {
+        _success = success_
+        return _success
+      })
+      miner.cancel();
     });
 
     miner.mine();
 
     return () => {
-      subscription.unsubscribe();
+      progress$.unsubscribe();
+      success$.unsubscribe();
       miner.cancel();
     };
   });
-
   $: miners = $progress
 </script>
 
@@ -108,6 +119,12 @@ notemine.progress$
 {#each $miners as miner}
 <span>Miner #{miner.workerId}: {miner.hashRate}kH/s [Best PoW: ${miner.bestPowData}]
 {/each}
+
+{#if($success !== null)}
+  <pre>
+  {$success.event}
+  </pre>
+{/if}
 
 </div>
 ```

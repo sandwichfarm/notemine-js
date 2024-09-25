@@ -1,43 +1,100 @@
-// webpack.config.js
 const path = require('path');
+const webpack = require('webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
   entry: './src/index.ts',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist/bundle'),
-    clean: true, 
+    filename: 'notemine.js',
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: '',
+    library: {
+      name: 'Notemine',
+      type: 'umd',
+    },
+    globalObject: 'this',
+    clean: true,
   },
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.js', '.wasm'],
   },
   module: {
     rules: [
       {
         test: /\.ts$/,
-        use: {
-          loader: 'ts-loader',
-          options: {
-            transpileOnly: true, // Skips type checking
-          },
-        },
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
       {
-        enforce: 'pre',
-        test: /\.js$/,
-        loader: 'source-map-loader',
+        test: /\.worker\.ts$/,
+        type: 'asset/resource',
+        generator: {
+          filename: '[name].js',
+        },
       },
-
+      // {
+      //   test: /\.worker\.ts$/,
+      //   use: 'ts-loader',
+      //   exclude: /node_modules/,
+      //   options: {
+      //     transpileOnly: true,
+      //   },
+      // },
+      // {
+      //   test: /\.worker\.ts$/,
+      //   use: [
+      //     {
+      //       loader: 'worker-loader',
+      //       options: {
+      //         filename: 'mine.worker.js',
+      //       },
+      //     },
+      //     'ts-loader',
+      //   ],
+      // },
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/async',
+      },
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+        ],
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]',
+        },
+      },
     ],
   },
   experiments: {
-    asyncWebAssembly: true, 
+    asyncWebAssembly: true,
+    syncWebAssembly: true,
   },
-  devtool: 'source-map',
-  devServer: {
-    static: './dist',
-    hot: true,
-    port: 3000,
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'styles.css',
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    }),
+  ],
+  externals: {
+    // 'rxjs': 'rxjs',
+    // 'nostr-tools': 'nostrTools',
   },
+  devtool: isProduction ? 'source-map' : 'inline-source-map',
+  mode: isProduction ? 'production' : 'development',
+  target: 'web',
+  optimization: {
+    minimize: isProduction,
+  }
 };

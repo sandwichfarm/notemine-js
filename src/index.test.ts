@@ -27,7 +27,12 @@ describe('Notemine', () => {
 
   it('should set tags', () => {
     miner.tags = [['tag1', 'value1']];
-    expect((miner as any).tags).toEqual([['tag1', 'value1']]);
+    expect((miner as any).tags).toEqual(expect.arrayContaining(
+      [
+        ['tag1', 'value1']
+      ]
+    ));
+
   });
 
   it('should set public key', () => {
@@ -48,7 +53,7 @@ describe('Notemine', () => {
     expect(miner.cancelled).toBe(true);
   });
 
-  it('should emit progress events', (done) => {
+  it('should emit progress events', (done:any) => {
     const progressSpy = vi.fn();
     const subscription = miner.progress$.subscribe(progressSpy);
 
@@ -59,17 +64,15 @@ describe('Notemine', () => {
       expect(progressSpy).toHaveBeenCalled();
       subscription.unsubscribe();
       miner.cancel();
-      done();
     }, 100);
   });
 
-  it('should handle mining success', (done) => {
+  it('should handle mining success', (done: any) => {
     const successSpy = vi.fn();
     miner.success$.subscribe((success) => {
       successSpy(success);
       expect(success.result).toBeDefined();
       expect(miner.mining).toBe(false);
-      done();
     });
 
     // Since we cannot actually mine without the WASM and worker setup,

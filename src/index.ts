@@ -1,6 +1,8 @@
 import { Subject } from 'rxjs';
+// import MineWorker from './mine.worker';
 
-interface MinerOptions {
+
+export interface MinerOptions {
   content?: string;
   tags?: string[][];
   pubkey?: string;
@@ -8,42 +10,42 @@ interface MinerOptions {
   numberOfWorkers?: number;
 }
 
-interface ProgressEvent {
+export interface ProgressEvent {
   workerId: number;
   hashRate: number;
   bestPowData?: BestPowData;
 }
 
-interface ErrorEvent {
+export interface ErrorEvent {
   error: any;
   message?: string;
 }
 
-interface CancelledEvent {
+export interface CancelledEvent {
   reason?: string;
 }
 
-interface SuccessEvent {
+export interface SuccessEvent {
   result: MinedResult | null;
 }
 
-interface BestPowData {
+export interface BestPowData {
   bestPow: number;
   nonce: string;
   hash: string;
 }
 
-interface WorkerPow extends BestPowData {
+export interface WorkerPow extends BestPowData {
   workerId: number;
 }
 
-interface MinedResult {
+export interface MinedResult {
   event: any;
   totalTime: number;
   hashRate: number;
 }
 
-class Notemine {
+export class Notemine {
   // Configuration
   private _content: string;
   private _tags: string[][];
@@ -88,7 +90,7 @@ class Notemine {
   }
 
   set tags(tags: string[][]) {
-    this._tags = [...this._tags, ...tags];
+    this._tags = Array.from(new Set([...this._tags, ...tags]));
   }
 
   get tags(): string[][] {
@@ -103,21 +105,21 @@ class Notemine {
     return this._pubkey;
   }
 
-  // set difficulty(difficulty: number) {
-  //   this._difficulty = difficulty;
-  // }
+  set difficulty(difficulty: number) {
+    this._difficulty = difficulty;
+  }
 
-  // get difficulty(): number {
-  //   return this._difficulty;
-  // }
+  get difficulty(): number {
+    return this._difficulty;
+  }
 
-  // set numberOfWorkers(numberOfWorkers: number) {
-  //   this._numberOfWorkers = numberOfWorkers;
-  // }
+  set numberOfWorkers(numberOfWorkers: number) {
+    this._numberOfWorkers = numberOfWorkers;
+  }
 
-  // get numberOfWorkers(): number {
-  //   return this._numberOfWorkers;
-  // }
+  get numberOfWorkers(): number {
+    return this._numberOfWorkers;
+  }
 
   mine(): void {
     if (this.mining) return;
@@ -155,8 +157,16 @@ class Notemine {
   }
 
   private initializeWorkers(): void {
+    console.log('Initializing workers...');
     for (let i = 0; i < this.numberOfWorkers; i++) {
+      console.log('Creating worker', i);  
+
       const worker = new Worker(new URL('./mine.worker.ts', import.meta.url))
+      // const worker = new Worker(new URL('./mine.worker.js', import.meta.url), {
+      //   type: 'module',
+      // })
+      // const worker = new Worker(new URL('./mine.worker.js', import.meta.url))
+      // const worker = new MineWorker();
 
       worker.onmessage = this.handleWorkerMessage.bind(this);
       worker.onerror = this.handleWorkerError.bind(this);
@@ -173,8 +183,10 @@ class Notemine {
   
       this.workers.push(worker);
     }
+    console.log('Num Workers', this.workers.length);
   }
   private handleWorkerMessage(e: MessageEvent): void {
+    console.log('Worker message:', e.data);
     const data = e.data;
     const { type, workerId, hashRate, bestPowData } = data;
 
@@ -204,7 +216,7 @@ class Notemine {
 
       this.successSubject.next({ result: this.result });
     } else if (type === 'error') {
-      this.errorSubject.next({ error: data.error });
+      this.errorSubject.next(data.error);
     }
   }
 
@@ -224,5 +236,3 @@ class Notemine {
     return JSON.stringify(event);
   }
 }
-
-export { Notemine, MinerOptions, ProgressEvent, ErrorEvent, CancelledEvent, SuccessEvent };

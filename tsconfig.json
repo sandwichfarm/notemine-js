@@ -1,20 +1,25 @@
-// tsconfig.json
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2020",
     "module": "ESNext",
-    "lib": ["DOM", "ES2015"],
+    "lib": ["DOM", "ES2020"],
     "allowJs": true,
-    "jsx": "react",
+    "declaration": true,
+    "declarationDir": "./dist/types",
+    "emitDeclarationOnly": false,
     "sourceMap": true,
-    "outDir": "./dist/bundle",
+    "outDir": "./dist",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["webpack-env"]
+    "types": ["webpack-env", "vitest/globals"],
+    "baseUrl": "./",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
   },
-  "include": ["src/**/*", "wasm/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "src/wasm/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"] 
 }

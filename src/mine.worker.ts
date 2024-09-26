@@ -1,10 +1,17 @@
-import init, { mine_event } from '../dist/wasm/notemine.js';
+import init, { mine_event } from './wasm/notemine.js';
 
 let mining = false;
 let workerId: number;
 let miningCancelled = false;
 
-self.onmessage = async function (e) {
+console.log('Worker loaded');
+
+setInterval(() => { 
+  console.log('Worker started');
+}, 1000);
+
+self.onmessage = async function (e: MessageEvent) {
+  console.log('Worker received message:', e.data);
   const { type, event, difficulty, id, totalWorkers } = e.data;
   workerId = id;
 
@@ -14,10 +21,8 @@ self.onmessage = async function (e) {
 
     try {
       await init();
-
       const startNonce = BigInt(workerId);
       const nonceStep = BigInt(totalWorkers);
-
       const reportProgress = (hashRate: number, bestPowData: any) => {
         const message: any = {
           type: 'progress',
@@ -29,7 +34,7 @@ self.onmessage = async function (e) {
           message.bestPowData = bestPowData;
         }
 
-        (self as any).postMessage(message);
+        self.postMessage(message);
       };
 
       const shouldCancel = () => {
@@ -45,10 +50,10 @@ self.onmessage = async function (e) {
         shouldCancel
       );
 
-      (self as any).postMessage({ type: 'result', data: minedResult, workerId });
+      self.postMessage({ type: 'result', data: minedResult, workerId });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      (self as any).postMessage({ type: 'error', error: errorMessage, workerId });
+      self.postMessage({ type: 'error', error: errorMessage, workerId });
     } finally {
       mining = false;
     }
@@ -57,4 +62,4 @@ self.onmessage = async function (e) {
   }
 };
 
-export default self
+export default self;

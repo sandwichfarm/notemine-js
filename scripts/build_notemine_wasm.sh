@@ -5,7 +5,7 @@ set -e
 TEMP_DIR="tmp"                         
 NOTEMINE_REPO_URL="https://github.com/sandwichfarm/notemine.git" 
 NOTEMINE_DIR="$TEMP_DIR/notemine"    
-WASM_OUTPUT_DIR=$(pwd)/dist/wasm
+WASM_OUTPUT_DIR=$(pwd)/src/wasm
 WASM_BUILD_TARGET="web"              
 
 rm -rf ./tmp
@@ -28,6 +28,9 @@ echo "Building the WASM module..."
 cd $NOTEMINE_DIR 
 cargo clean
 wasm-pack build --target "$WASM_BUILD_TARGET" --out-dir $WASM_OUTPUT_DIR --release 
+
+chmod +x $WASM_OUTPUT_DIR/*.wasm
+
 
 # # Delete useless wasm-bindgen typescript types
 # echo "Deleting useless typescript types"

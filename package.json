@@ -25,7 +25,7 @@
     "ts": "tsc",
     "rollup": "rollup --config",
     "build": "yarn clean && yarn types && yarn rollup",
-    "dev": "webpack --mode production --watch",
+    "dev": "rollup -c --watch",
     "clean": "rimraf dist",
     "start": "webpack --mode development",
     "test": "vitest"

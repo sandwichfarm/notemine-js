@@ -250,6 +250,35 @@
   {/if}
 </button>
 
+<button
+  data-npub="npub1uac67zc9er54ln0kl6e4qp2y6ta3enfcg7ywnayshvlw9r5w6ehsqq99rx"
+  data-relays="wss://relay.damus.io,wss://relay.snort.social,wss://nos.lol,wss://nostr.fmt.wiz.biz,wss://nostr.mutinywallet.com,wss://nostr.mywire.org,wss://relay.primal.net"
+  style="inline-block"
+>
+    ⚡️ zap me
+</button>
+
+<button
+  onclick="document.location.href='https://njump.me/nprofile1qythwumn8ghj7un9d3shjtnswf5k6ctv9ehx2ap0qy88wumn8ghj7mn0wvhxcmmv9uq3samnwvaz7tmwdaehgu3wvekhgtnhd9azucnf0ghsqg88wxhskpwga90umah7kdgq23xjlvwv6wz83r5lfy9m8m3garkkdusz5s2r'"
+  style="display: inline-block; cursor: pointer;"
+>
+    🍻 follow
+</button>
+
+<button
+  onclick="document.location.href='https://github.com/sandwichfarm/minnote-wasm'"
+  style="display: inline-block; cursor: pointer;"
+>
+    🤖 git
+</button>
+
+<button
+  onclick="document.location.href='https://crates.io/crates/notemine'"
+  style="display: inline-block; cursor: pointer;"
+>
+    📦️ crate
+</button>
+
 <div id="user">
   posting as: 
   <img 

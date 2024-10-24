@@ -8,7 +8,7 @@ import copy from 'rollup-plugin-copy';
 import wasm from '@rollup/plugin-wasm';
 import { terser } from 'rollup-plugin-terser';
 import livereload from 'rollup-plugin-livereload';
-import offMainThread from '@surma/rollup-plugin-off-main-thread';
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -36,6 +36,10 @@ const basePlugins = [
   }),
   terser(),
   livereload('dist'),
+  webWorkerLoader({
+    inline: true, // Inline the web worker to avoid path mismatches
+    targetPlatform: 'browser',
+  }),
 ];
 
 export default [
@@ -49,10 +53,7 @@ export default [
       entryFileNames: 'index.esm.js',
     },
     external: ['rxjs', 'nostr-tools', 'wasm/notemine.js'],
-    plugins: [
-      ...basePlugins,
-      offMainThread({ inline: true }), // Inline the web worker
-    ],
+    plugins: basePlugins,
     watch: {
       exclude: 'node_modules/**',
       clearScreen: false,
@@ -69,10 +70,7 @@ export default [
       name: 'Notemine',
     },
     external: ['rxjs', 'nostr-tools', 'wasm/notemine.js'],
-    plugins: [
-      ...basePlugins,
-      offMainThread({ inline: true }), // Inline the web worker
-    ],
+    plugins: basePlugins,
     watch: {
       exclude: 'node_modules/**',
       clearScreen: false,

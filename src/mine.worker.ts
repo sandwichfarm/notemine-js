@@ -44,8 +44,11 @@ self.onmessage = async function (e: MessageEvent) {
   console.log('Worker received message:', e.data);
   try {
     const { type, event, difficulty, id, totalWorkers } = e.data;
+    console.log(e.data)
 
-    if (!event || !difficulty || id === undefined || !totalWorkers) {
+    // return 
+
+    if (!event || !difficulty || id === undefined || !totalWorkers || type === 'error') {
       throw new Error('Missing required mining parameters');
     }
 
@@ -106,3 +109,5 @@ self.onmessage = async function (e: MessageEvent) {
     self.close();
   }
 };
+
+export default self

@@ -1,21 +1,32 @@
 {
-  "name": "notemine",
+  "name": "@notemine/wrapper",
   "version": "0.0.4",
   "author": "bread@sandwich.farm",
   "description": "Nostr note miner wrapper for notemine WASM",
   "repository": "https://github.com/sandwichfarm/notemine-js",
   "license": "MIT",
-  "main": "dist/notemine.js",
-  "browser": "dist/notemine.js",
-  "types": "dist/notemine.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "next": "./dist/index.esm.js",
+  "browser": "./dist/index.amd.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "wasm": "sh ./scripts/build_notemine_wasm.sh",
     "types": "tsc --emitDeclarationOnly",
     "ts": "tsc",
     "rollup": "rollup --config",
-    "build": "yarn clean && yarn wasm && yarn types && yarn webpack",
+    "build": "yarn clean && yarn types && yarn rollup",
     "dev": "webpack --mode production --watch",
-    "clean": "rm -rf dist",
+    "clean": "rimraf dist",
     "start": "webpack --mode development",
     "test": "vitest"
   },
@@ -28,7 +39,9 @@
   ],
   "dependencies": {
     "nostr-tools": "2.7.2",
-    "rxjs": "7.8.1"
+    "notemine": "0.3.2",
+    "rxjs": "7.8.1",
+    "web-worker": "1.3.0"
   },
   "peerDependencies": {
     "nostr-tools": "^2.7.2",
@@ -47,8 +60,10 @@
     "happy-dom": "15.7.4",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.5",
+    "rimraf": "6.0.1",
     "rollup": "4.22.4",
     "rollup-plugin-copy": "3.5.0",
+    "rollup-plugin-livereload": "2.0.5",
     "rollup-plugin-terser": "7.0.2",
     "rollup-plugin-typescript2": "0.36.0",
     "rollup-plugin-web-worker-loader": "1.6.1",

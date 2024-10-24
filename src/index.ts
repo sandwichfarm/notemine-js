@@ -1,6 +1,7 @@
-import { Subject } from 'rxjs';
-// import MineWorker from './mine.worker';
+// index.ts
 
+import { Subject, BehaviorSubject } from 'rxjs';
+import Worker from 'web-worker';
 
 export interface MinerOptions {
   content?: string;
@@ -12,7 +13,7 @@ export interface MinerOptions {
 
 export interface ProgressEvent {
   workerId: number;
-  hashRate: number;
+  hashRate?: number;
   bestPowData?: BestPowData;
 }
 
@@ -54,28 +55,28 @@ export class Notemine {
   private _numberOfWorkers: number;
   static _defaultTags: string[][] = [['miner', 'notemine']];
 
-  // State
-  public mining: boolean = false;
-  public cancelled: boolean = false;
-  public result: MinedResult | null = null;
-  private workers: Worker[] = [];
-  private workersPow: Record<number, BestPowData> = {};
-  public highestPow: WorkerPow | null = null;
+  // State with BehaviorSubjects
+  public mining$ = new BehaviorSubject<boolean>(false);
+  public cancelled$ = new BehaviorSubject<boolean>(false); // Track mining cancel state
+  public result$ = new BehaviorSubject<MinedResult | null>(null);
+  public workers$ = new BehaviorSubject<Worker[]>([]);
+  public workersPow$ = new BehaviorSubject<Record<number, BestPowData>>({});
+  public highestPow$ = new BehaviorSubject<WorkerPow | null>(null);
 
-  // Observables
+  // Observables for events
   private progressSubject = new Subject<ProgressEvent>();
   private errorSubject = new Subject<ErrorEvent>();
-  private cancelledSubject = new Subject<CancelledEvent>();
+  private cancelledEventSubject = new Subject<CancelledEvent>(); // Renamed from cancelledSubject
   private successSubject = new Subject<SuccessEvent>();
 
   public progress$ = this.progressSubject.asObservable();
   public error$ = this.errorSubject.asObservable();
-  public cancelled$ = this.cancelledSubject.asObservable();
+  public cancelledEvent$ = this.cancelledEventSubject.asObservable(); // Updated observable
   public success$ = this.successSubject.asObservable();
 
   constructor(options?: MinerOptions) {
     this._content = options?.content || '';
-    this._tags = [...Notemine._defaultTags, ...options?.tags || []];
+    this._tags = [...Notemine._defaultTags, ...(options?.tags || [])];
     this._pubkey = options?.pubkey || '';
     this._difficulty = options?.difficulty || 20;
     this._numberOfWorkers = options?.numberOfWorkers || navigator.hardwareConcurrency || 4;
@@ -122,7 +123,7 @@ export class Notemine {
   }
 
   mine(): void {
-    if (this.mining) return;
+    if (this.mining$.getValue()) return;
 
     if (!this.pubkey) {
       throw new Error('Public key is not set.');
@@ -132,12 +133,12 @@ export class Notemine {
       throw new Error('Content is not set.');
     }
 
-    this.mining = true;
-    this.cancelled = false;
-    this.result = null;
-    this.workers = [];
-    this.workersPow = {};
-    this.highestPow = null;
+    this.mining$.next(true);
+    this.cancelled$.next(false);
+    this.result$.next(null);
+    this.workers$.next([]);
+    this.workersPow$.next({});
+    this.highestPow$.next(null);
 
     this.initializeWorkers();
   }
@@ -147,81 +148,96 @@ export class Notemine {
   }
 
   cancel(): void {
-    if (!this.mining) return;
+    if (!this.mining$.getValue()) return;
 
-    this.cancelled = true;
-    this.workers.forEach(worker => worker.terminate());
-    this.mining = false;
+    this.cancelled$.next(true);
+    this.workers$.getValue().forEach(worker => worker.terminate());
+    this.mining$.next(false);
 
-    this.cancelledSubject.next({ reason: 'Mining cancelled by user.' });
+    this.cancelledEventSubject.next({ reason: 'Mining cancelled by user.' }); // Renamed
   }
 
   private initializeWorkers(): void {
-    console.log('Initializing workers...');
-    for (let i = 0; i < this.numberOfWorkers; i++) {
-      console.log('Creating worker', i);  
+    try {
+      console.log('Initializing workers...');
+      const workers: Worker[] = [];
+      for (let i = 0; i < this.numberOfWorkers; i++) {
+        console.log(`Creating worker ${i}`);
+        const worker = new Worker(new URL('./mine.worker.ts', import.meta.url), { type: "module" });
+        worker.onmessage = this.handleWorkerMessage.bind(this);
+        worker.onerror = this.handleWorkerError.bind(this);
 
-      const worker = new Worker(new URL('./mine.worker.ts', import.meta.url))
-      // const worker = new Worker(new URL('./mine.worker.js', import.meta.url), {
-      //   type: 'module',
-      // })
-      // const worker = new Worker(new URL('./mine.worker.js', import.meta.url))
-      // const worker = new MineWorker();
+        const event = this.prepareEvent();
 
-      worker.onmessage = this.handleWorkerMessage.bind(this);
-      worker.onerror = this.handleWorkerError.bind(this);
-  
-      const event = this.prepareEvent();
-  
-      worker.postMessage({
-        type: 'mine',
-        event,
-        difficulty: this.difficulty,
-        id: i,
-        totalWorkers: this.numberOfWorkers,
-      });
-  
-      this.workers.push(worker);
+        worker.postMessage({
+          type: 'mine',
+          event,
+          difficulty: this.difficulty,
+          id: i,
+          totalWorkers: this.numberOfWorkers,
+        });
+
+        workers.push(worker);
+      }
+
+      this.workers$.next(workers);
+      console.log(`Initialized ${workers.length} workers.`);
+    } catch (error) {
+      this.errorSubject.next({ error });
+      console.error('Error initializing workers:', error);
     }
-    console.log('Num Workers', this.workers.length);
   }
+
   private handleWorkerMessage(e: MessageEvent): void {
-    console.log('Worker message:', e.data);
     const data = e.data;
-    const { type, workerId, hashRate, bestPowData } = data;
+    const { type, workerId } = data;
 
-    if (type === 'progress') {
+    console.log('Message from worker:', data);
 
-      if (bestPowData) {
-        this.workersPow[workerId] = bestPowData;
+    if (type === 'initialized') {
+      console.log(`Worker ${workerId} initialized:`, data.message);
+    } else if (type === 'progress') {
+      let bestPowData: BestPowData | undefined;
+      let hashRate: number | undefined;
 
+      if (data.bestPowData) {
+        bestPowData = data.bestPowData as BestPowData;
 
-        if (!this.highestPow || bestPowData.best_pow > this.highestPow.bestPow) {
-          this.highestPow = {
-            bestPow: bestPowData.best_pow,
-            nonce: bestPowData.nonce,
-            hash: bestPowData.hash,
+        const workersPow = { ...this.workersPow$.getValue() };
+        workersPow[workerId] = bestPowData;
+        this.workersPow$.next(workersPow);
+
+        if (!this.highestPow$.getValue() || bestPowData.bestPow > this.highestPow$.getValue()!.bestPow) {
+          this.highestPow$.next({
+            ...bestPowData,
             workerId,
-          };
+          });
         }
       }
 
+      hashRate = data.hashRate;
+
       this.progressSubject.next({ workerId, hashRate, bestPowData });
     } else if (type === 'result') {
+      console.log('Mining result received:', data.data);
+      this.result$.next(data.data);
+      this.mining$.next(false);
 
-      this.result = data.data;
-      this.mining = false;
-
-      this.workers.forEach(worker => worker.terminate());
-
-      this.successSubject.next({ result: this.result });
+      this.workers$.getValue().forEach(worker => worker.terminate());
+      this.successSubject.next({ result: this.result$.getValue() });
     } else if (type === 'error') {
-      this.errorSubject.next(data.error);
+      console.error('Error from worker:', data.error);
+      this.errorSubject.next({ error: data.error || 'Unknown error from worker' });
     }
   }
 
   private handleWorkerError(e: ErrorEvent): void {
-    this.errorSubject.next({ error: e.error || e.message });
+    console.error('Worker encountered an error:', e);
+    const errorDetails = {
+      message: e.message,
+      error: e.error ? e.error.message : null,
+    };
+    this.errorSubject.next({ error: JSON.stringify(errorDetails) });
   }
 
   private prepareEvent(): string {

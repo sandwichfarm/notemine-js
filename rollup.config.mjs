@@ -6,15 +6,16 @@ import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
 import copy from 'rollup-plugin-copy';
 import wasm from '@rollup/plugin-wasm';
-import OMT from '@surma/rollup-plugin-off-main-thread';
 import { terser } from 'rollup-plugin-terser';
+import livereload from 'rollup-plugin-livereload';
+import offMainThread from '@surma/rollup-plugin-off-main-thread';
 
 const production = !process.env.ROLLUP_WATCH;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const plugins = [
+const basePlugins = [
   resolve({
     extensions: ['.ts', '.js', '.json', '.wasm'],
     browser: true,
@@ -30,43 +31,51 @@ const plugins = [
   }),
   commonjs(),
   wasm(),
-  OMT(),
+  copy({
+    targets: [{ src: 'src/wasm/*', dest: 'dist/wasm' }],
+  }),
+  terser(),
+  livereload('dist'),
 ];
 
 export default [
-  // IIFE build configuration
+  // ESM Output with Web Worker inlined
   {
     input: './src/index.ts',
     output: {
-      dir: './dist/iife/',
-      format: 'iife',
-      name: 'Notemine',
+      dir: './dist',
+      format: 'esm',
       sourcemap: true,
+      entryFileNames: 'index.esm.js',
     },
     external: ['rxjs', 'nostr-tools', 'wasm/notemine.js'],
     plugins: [
-      ...plugins,
-      copy({
-        targets: [{ src: 'src/wasm/*', dest: 'dist/iife/wasm' }],
-      }),
-      production && terser(),
+      ...basePlugins,
+      offMainThread({ inline: true }), // Inline the web worker
     ],
+    watch: {
+      exclude: 'node_modules/**',
+      clearScreen: false,
+    },
   },
-  // ESM build configuration
+  // AMD Output with Web Worker inlined
   {
     input: './src/index.ts',
     output: {
-      dir: './dist/next/',
-      format: 'es',
+      dir: './dist',
+      format: 'amd',
       sourcemap: true,
+      entryFileNames: 'index.amd.js',
+      name: 'Notemine',
     },
     external: ['rxjs', 'nostr-tools', 'wasm/notemine.js'],
     plugins: [
-      ...plugins,
-      copy({
-        targets: [{ src: 'src/wasm/*', dest: 'dist/next/wasm' }],
-      }),
-      production && terser(),
+      ...basePlugins,
+      offMainThread({ inline: true }), // Inline the web worker
     ],
+    watch: {
+      exclude: 'node_modules/**',
+      clearScreen: false,
+    },
   },
 ];

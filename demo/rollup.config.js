@@ -1,10 +1,12 @@
 import svelte from 'rollup-plugin-svelte';
-import commonjs from '@rollup/plugin-commonjs';
-import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import typescript from 'rollup-plugin-typescript2';
+import wasm from '@rollup/plugin-wasm';
+import postcss from 'rollup-plugin-postcss';
+import { terser } from 'rollup-plugin-terser';
+import { sveltePreprocess } from 'svelte-preprocess';
 import livereload from 'rollup-plugin-livereload';
-import css from 'rollup-plugin-css-only';
-import copy from 'rollup-plugin-copy';
 import { spawn } from 'child_process';
 
 const production = !process.env.ROLLUP_WATCH;
@@ -21,7 +23,7 @@ function serve() {
       if (server) return;
       server = spawn('yarn', ['start', '--', '--dev'], {
         stdio: ['ignore', 'inherit', 'inherit'],
-        shell: true
+        shell: true,
       });
 
       process.on('SIGTERM', toExit);
@@ -34,35 +36,46 @@ export default {
   input: 'src/main.js',
   output: {
     sourcemap: true,
-    format: 'iife',
+    format: 'iife',  // IIFE format works well in the browser context
     name: 'app',
-    file: 'public/build/bundle.js'
+    file: 'public/build/bundle.js',
   },
   plugins: [
     svelte({
       compilerOptions: {
-        dev: !production
-      }
+        dev: !production,
+      },
+      preprocess: sveltePreprocess(),
     }),
-    css({ output: 'bundle.css' }),
+
     resolve({
       browser: true,
       dedupe: ['svelte'],
-      exportConditions: ['svelte', 'import']
     }),
-    copy({
-      targets: [
-        { src: '../dist/notemine.js', dest: 'public/build/' },
-        { src: '../dist/*worker*', dest: 'public/build/' },
-        { src: '../dist/wasm/*', dest: 'public/build/wasm' }
-      ]
+
+    commonjs({
+      include: 'node_modules/**',  // Ensure CommonJS modules are properly handled
+      sourceMap: !production,
     }),
-    commonjs(),
+
+    typescript({ sourceMap: !production }),
+
+    wasm(), // Handle WASM files
+
+    // Add PostCSS for CSS handling
+    postcss({
+      extract: true,
+    }),
+
+    // Auto-reload in development mode
     !production && serve(),
     !production && livereload('public'),
-    production && terser()
+
+    // Minify for production
+    production && terser(),
   ],
+
   watch: {
-    clearScreen: false
-  }
+    clearScreen: false,
+  },
 };

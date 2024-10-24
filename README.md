@@ -7,7 +7,7 @@
 `notemine` is a typescript module that wraps [notemine](https://github.com/sandwichfarm/notemine) `wasm-bindgen` interfaces. More convenient and has added observables for more consistent use throughout modern web stacks. 
 
 ## install
-package name: `notemine`
+package name: `@notemine/wrapper`
 
 **npm**
 ```bash

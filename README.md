@@ -18,7 +18,7 @@ package name: `@notemine/wrapper`
 <summary>pnpm</summary>
 
 ```bash
-  pnpm install notemine
+  pnpm install @notemine/wrapper
 ```
 </details>
 
@@ -26,7 +26,7 @@ package name: `@notemine/wrapper`
 <summary>yarn</summary>
 
 ```bash
-  yarn install notemine
+  yarn install @notemine/wrapper
 ```
 </details>
 
@@ -34,7 +34,7 @@ package name: `@notemine/wrapper`
 _untested_
 
 ```typescript 
-  import Notemine from "notemine"
+  import Notemine from "@notemine/wrapper"
 
   //prepare meta for event 
   const content = "hello world."
@@ -77,7 +77,7 @@ notemine.success$
 <script lang="ts">
   import { onMount } from 'svelte';
   import { type Writable, writable } from 'svelte/store'
-  import { type ProgressEvent, Notemine } from 'notemine';
+  import { type ProgressEvent, Notemine } from '@notemine/wrapper';
 
   const numberOfMiners = 8
   let notemine: Notemine;
@@ -137,7 +137,7 @@ notemine.success$
 
 ```reactjs
   import React, { useEffect } from 'react';
-  import { Notemine } from 'notemine';
+  import { Notemine } from '@notemine/wrapper';
 
   const MyComponent = () => {
     const notemine = new Notemine({ content: 'Hello, Nostr!' });
@@ -177,7 +177,7 @@ notemine.success$
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted } from 'vue';
-import { Notemine } from 'notemine';
+import { Notemine } from '@notemine/wrapper';
 
 export default defineComponent({
   name: 'MinerComponent',

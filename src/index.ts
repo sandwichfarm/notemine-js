@@ -1,8 +1,7 @@
 // index.ts
 
 import { Subject, BehaviorSubject } from 'rxjs';
-import * as MineWorkerModule from './mine.worker';
-const MineWorker = MineWorkerModule as unknown as { new (): Worker };
+// import MineWorker from './mine.worker'
 
 export interface MinerOptions {
   content?: string;
@@ -165,10 +164,10 @@ export class Notemine {
       const workers: Worker[] = [];
       for (let i = 0; i < this.numberOfWorkers; i++) {
         console.log(`Creating worker ${i}`);
-        const worker = new MineWorker();
+        const worker = new Worker(new URL('./mine.worker.ts', import.meta.url), { type: "module" });
+        // const worker = new MineWorker();
         worker.onmessage = this.handleWorkerMessage.bind(this);
         worker.onerror = this.handleWorkerError.bind(this);
-
         const event = this.prepareEvent();
 
         worker.postMessage({

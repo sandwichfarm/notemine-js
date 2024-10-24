@@ -41,6 +41,11 @@ const destructureBestPowData = (data: BestPowDataMap | any): BestPowData => {
 self.postMessage({ type: 'initialized', message: 'Worker initialized successfully' });
 
 self.onmessage = async function (e: MessageEvent) {
+
+  if (e?.data?.name) {
+    console.log("Ignoring injected message:", e.data);
+    return;
+  }
   console.log('Worker received message:', e.data);
   try {
     const { type, event, difficulty, id, totalWorkers } = e.data;
@@ -48,9 +53,9 @@ self.onmessage = async function (e: MessageEvent) {
 
     // return 
 
-    if (!event || !difficulty || id === undefined || !totalWorkers || type === 'error') {
-      throw new Error('Missing required mining parameters');
-    }
+    // if (!event || !difficulty || id === undefined || !totalWorkers || type === 'error') {
+    //   throw new Error('Missing required mining parameters');
+    // }
 
     workerId = id;
 

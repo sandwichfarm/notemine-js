@@ -8,8 +8,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.js"
     }
   },
   "main": "./dist/index.cjs.js",
@@ -24,8 +23,9 @@
     "types": "tsc --emitDeclarationOnly",
     "ts": "tsc",
     "rollup": "rollup --config",
-    "build": "yarn clean && yarn types && yarn rollup",
-    "dev": "rollup -c --watch",
+    "build": "yarn clean && yarn build:types && node build.js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "dev": "node build.js",
     "clean": "rimraf dist",
     "start": "webpack --mode development",
     "test": "vitest"
@@ -38,6 +38,7 @@
     "rxjs"
   ],
   "dependencies": {
+    "@aidenlx/esbuild-plugin-inline-worker": "1.0.1",
     "nostr-tools": "2.7.2",
     "notemine": "0.3.2",
     "rxjs": "7.8.1",
@@ -48,6 +49,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@jgoz/esbuild-plugin-livereload": "2.1.1",
     "@rollup/plugin-commonjs": "28.0.0",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-replace": "6.0.1",
@@ -57,6 +59,12 @@
     "@types/webpack-env": "1.18.5",
     "@vitest/web-worker": "2.1.1",
     "css-loader": "^6.7.3",
+    "esbuild": "0.24.0",
+    "esbuild-plugin-clean": "1.0.1",
+    "esbuild-plugin-inline-worker": "0.1.1",
+    "esbuild-plugin-polyfill-node": "0.3.0",
+    "esbuild-plugin-tsc": "0.4.0",
+    "get-port": "7.1.0",
     "happy-dom": "15.7.4",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.5",

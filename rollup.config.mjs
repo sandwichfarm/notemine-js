@@ -37,13 +37,13 @@ const basePlugins = [
   terser(),
   livereload('dist'),
   webWorkerLoader({
-    inline: true, // Inline the web worker to avoid path mismatches
+    inline: true,
     targetPlatform: 'browser',
-  }),
+    extensions: ['.ts'],
+  })
 ];
 
 export default [
-  // ESM Output with Web Worker inlined
   {
     input: './src/index.ts',
     output: {
@@ -51,23 +51,6 @@ export default [
       format: 'esm',
       sourcemap: true,
       entryFileNames: 'index.esm.js',
-    },
-    external: ['rxjs', 'nostr-tools', 'wasm/notemine.js'],
-    plugins: basePlugins,
-    watch: {
-      exclude: 'node_modules/**',
-      clearScreen: false,
-    },
-  },
-  // AMD Output with Web Worker inlined
-  {
-    input: './src/index.ts',
-    output: {
-      dir: './dist',
-      format: 'amd',
-      sourcemap: true,
-      entryFileNames: 'index.amd.js',
-      name: 'Notemine',
     },
     external: ['rxjs', 'nostr-tools', 'wasm/notemine.js'],
     plugins: basePlugins,

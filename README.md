@@ -4,21 +4,21 @@
 [![build](https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/build.yaml ) 
 [![test](https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml/badge.svg)]( https://github.com/sandwichfarm/notemine-js/actions/workflows/test.yaml )
 
-`notemine` is a typescript module that wraps [notemine](https://github.com/sandwichfarm/notemine) `wasm-bindgen` interfaces. More convenient and has added observables for more consistent use throughout modern web stacks. 
+`@notemine/wrapper` is a typescript module that wraps [notemine](https://github.com/sandwichfarm/notemine) `wasm-bindgen` interfaces. More convenient and has added observables for more consistent use throughout modern web stacks. 
 
 ## install
-package name: `notemine`
+package name: `@notemine/wrapper`
 
 **npm**
 ```bash
-  npm install notemine
+  npm install @notemine/wrapper
 ```
 
 <details>
 <summary>pnpm</summary>
 
 ```bash
-  pnpm install notemine
+  pnpm install @notemine/wrapper
 ```
 </details>
 
@@ -26,7 +26,7 @@ package name: `notemine`
 <summary>yarn</summary>
 
 ```bash
-  yarn install notemine
+  yarn install @notemine/wrapper
 ```
 </details>
 
@@ -34,7 +34,7 @@ package name: `notemine`
 _untested_
 
 ```typescript 
-  import Notemine from "notemine"
+  import Notemine from "@notemine/wrapper"
 
   //prepare meta for event 
   const content = "hello world."
@@ -76,8 +76,9 @@ notemine.success$
 ```svelte
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { type Writable, writable } from 'svelte/store'
-  import { type ProgressEvent, Notemine } from 'notemine';
+  import { type Writable, writable } from 'svelte/store';
+  import { type ProgressEvent, Notemine } from '@notemine/wrapper';
+
 
   const numberOfMiners = 8
   let notemine: Notemine;
@@ -137,7 +138,7 @@ notemine.success$
 
 ```reactjs
   import React, { useEffect } from 'react';
-  import { Notemine } from 'notemine';
+  import { Notemine } from '@notemine/wrapper';
 
   const MyComponent = () => {
     const notemine = new Notemine({ content: 'Hello, Nostr!' });
@@ -177,7 +178,7 @@ notemine.success$
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted } from 'vue';
-import { Notemine } from 'notemine';
+import { Notemine } from '@notemine/wrapper';
 
 export default defineComponent({
   name: 'MinerComponent',
@@ -210,7 +211,7 @@ export default defineComponent({
 
 ```javascript
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Notemine } from 'notemine';
+import { Notemine } from '@notemine/wrapper';
 import { Subscription } from 'rxjs';
 
 @Component({

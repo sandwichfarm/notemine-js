@@ -2,7 +2,7 @@
   "name": "@notemine/wrapper",
   "version": "0.0.4",
   "author": "bread@sandwich.farm",
-  "description": "Nostr note miner wrapper for notemine WASM",
+  "description": "Nostr note miner wrapper for notemine wasm-bindgen",
   "repository": "https://github.com/sandwichfarm/notemine-js",
   "license": "MIT",
   "type": "module",

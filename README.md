@@ -76,8 +76,9 @@ notemine.success$
 ```svelte
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { type Writable, writable } from 'svelte/store'
+  import { type Writable, writable } from 'svelte/store';
   import { type ProgressEvent, Notemine } from '@notemine/wrapper';
+
 
   const numberOfMiners = 8
   let notemine: Notemine;
@@ -210,7 +211,7 @@ export default defineComponent({
 
 ```javascript
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Notemine } from 'notemine';
+import { Notemine } from '@notemine/wrapper';
 import { Subscription } from 'rxjs';
 
 @Component({

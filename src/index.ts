@@ -1,7 +1,7 @@
 
 import { Subject, BehaviorSubject } from 'rxjs';
+//@ts-ignore: multi-stage build hack to facilitate inline base64 wasm within an inline web-worker.
 import MineWorker from '../dist/mine.worker.js';
-
 
 export interface MinerOptions {
   content?: string;

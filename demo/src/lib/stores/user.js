@@ -5,3 +5,14 @@ export const user = writable({
   pubkey: '',
   secret: ''
 });
+
+export const profile = writable({
+  name: '',
+  photo: ''
+});
+
+export const events = writable({
+  k0: {},
+  k3: {},
+  k10002: {}
+});

@@ -1,36 +1,14 @@
 <script>
   import { writable, derived, get } from 'svelte/store';
-  import { generateSecretKey, getPublicKey, Relay, SimplePool } from 'nostr-tools'; 
+  import { generateSecretKey, getPublicKey } from 'nostr-tools'; 
   import { onMount, onDestroy } from 'svelte';
   import { Notemine } from '@notemine/wrapper';
-  import { user, relaySettings, miningState, contentState } from './lib/stores/index';
-
-  const POW_RELAYS = [
-    'wss://nostr.bitcoiner.social',
-    'wss://nostr.mom',
-    'wss://nos.lol',
-    'wss://powrelay.xyz',
-    'wss://labour.fiatjaf.com/',
-    'wss://nostr.lu.ke',
-    'wss://140.f7z.io'
-  ];
+  import { user, relaySettings, miningState, contentState, activeRelays, usub, powRelays } from './lib/stores/index';
+  import { publishEvent } from './lib/nostr';
+  import { pool, onevent, oneose, onclose } from './lib/nostr';
 
   let notemine;
   let progressSub, successSub, errorSub, bestPowSub, workersPowSub;
-
-  const activeRelays = derived(
-    [relaySettings],
-    ($relaySettings) => {
-      let relays = [];
-      if ($relaySettings.myRelays && $relaySettings.myRelays.length > 0) {
-        relays.push(...$relaySettings.myRelays);
-      }
-      if ($relaySettings.powRelaysEnabled) {
-        relays.push(...POW_RELAYS);
-      }
-      return relays;
-    }
-  );
 
   function authAnon() {
     const newSecret = generateSecretKey();
@@ -39,18 +17,16 @@
       secret: newSecret,
       pubkey: getPublicKey(newSecret)
     });
-    // relaySettings.update(r => ({ ...r, myRelays: [] }));
+    relaySettings.update(r => ({ ...r, myRelays: [] }));
   }
 
   async function authUser() {
     try {
-      const userPubkey = await window.nostr.getPublicKey();
-      user.set({
-        isAnon: false,
-        pubkey: userPubkey,
-        secret: ''
-      });
-      relaySettings.update(r => ({ ...r, myRelays: [] }));
+      const pubkey = await window.nostr.getPublicKey();
+      const isAnon = false 
+      const secret = ''
+      user.set({ isAnon, pubkey, secret });
+      await getUserData();
     } catch (error) {
       console.error('Authentication failed:', error);
     }
@@ -69,11 +45,15 @@
     relaySettings.update(r => ({ ...r, myRelaysVisible: !r.myRelaysVisible }));
   }
 
-  function setMyRelays(relays) {
-    relaySettings.update(r => ({
-      ...r,
-      myRelays: Array.from(new Set([...r.myRelays, ...relays]))
-    }));
+  async function getUserData(){
+    const currentUser = get(user);
+    return new Promise( async (resolve, reject) => {
+      $usub = pool.subscribeMany(
+        ['wss://purplepag.es', 'wss://user.kindpag.es'],
+        [{kinds: [0,3,10002], authors: [currentUser.pubkey]}],
+        { onevent, oneose, onclose: onclose(resolve) }
+      );
+    });
   }
 
   function startMining() {
@@ -126,13 +106,15 @@
       });
     });
 
-    successSub = notemine.success$.subscribe(({ result: minedResult }) => {
-      const currentActiveRelays = get(activeRelays);
+    successSub = notemine.success$.subscribe(async ({ result: minedResult }) => {
+      // const currentActiveRelays = get(activeRelays);
+      console.log(`currentActiveRelays: ${$activeRelays}`);
+      await publishEvent(minedResult.event)
       miningState.update(m => ({
         ...m,
         mining: false,
         result: minedResult ? JSON.stringify(minedResult, null, 2) : 'No result received.',
-        relayStatus: `Published to relays: ${currentActiveRelays.join(', ')}`
+        relayStatus: `Published to relays: ${$activeRelays.join(', ')}`
       }));
     });
 
@@ -266,14 +248,18 @@
 
 <div id="user">
   posting as: 
+  <!-- svelte-ignore a11y-img-redundant-alt -->
   <img 
     id="userPhoto" 
     width="20" 
     height="20" 
-    src={$user.isAnon ? './lib/img/anon.svg' : 'path_to_user_photo'} 
+    src={$user.isAnon ? '/img/anon.svg' : $user.photo} 
     alt="User Photo" 
   /> 
-  <span id="userName">{$user.isAnon ? 'anon' : $user.pubkey}</span> 
+  <span id="userName">{$user.isAnon ? 'anon' : $user.name}</span> 
+  
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <small 
     id="relaysToggle" 
     style="cursor: pointer; color:#333;" 
@@ -285,17 +271,21 @@
   
   {#if $relaySettings.myRelaysVisible}
     <div id="relaysContainer">
+      {#if $relaySettings.myRelays.length > 0}
       <strong>My Relays:</strong>
       <ul>
         {#each $relaySettings.myRelays as relay}
           <li>{relay}</li>
         {/each}
       </ul>
+      {/if}
       <br />
+      {#if $relaySettings.myRelays.length > 0}
       <input type="checkbox" bind:checked={$relaySettings.powRelaysEnabled}> 
+      {/if}
       <strong>POW Relays: </strong>
       <ul>
-        {#each POW_RELAYS as relay}
+        {#each $powRelays as relay}
           <li>{relay}</li>
         {/each}
       </ul>
@@ -363,3 +353,7 @@
 
 <h2>Relay Status:</h2>
 <pre id="relayStatus">{$miningState.relayStatus}</pre>
+
+
+
+{JSON.stringify($activeRelays)}

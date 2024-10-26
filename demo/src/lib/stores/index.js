@@ -1,4 +1,5 @@
-export { user } from './user';
-export { miningState } from './mining-state';
-export { relaySettings } from './relay-settings';
-export { contentState } from './content-state'; 
+export * from './user';
+export * from './mining-state';
+export * from './relay-settings';
+export * from './content-state'; 
+export * from './relays';

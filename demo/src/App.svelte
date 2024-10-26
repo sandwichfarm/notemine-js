@@ -15,7 +15,7 @@
     'wss://140.f7z.io'
   ];
 
-  let notemineInstance;
+  let notemine;
   let progressSub, successSub, errorSub, bestPowSub, workersPowSub;
 
   const activeRelays = derived(
@@ -87,14 +87,14 @@
 
     miningState.update(m => ({ ...m, mining: true, result: 'Mining started...' }));
 
-    notemineInstance = new Notemine({
+    notemine = new Notemine({
       content: currentContent.content,
       pubkey: currentUser.pubkey,
       difficulty: currentContent.difficulty,
       numberOfWorkers: currentContent.numberOfWorkers,
     });
 
-    workersPowSub = notemineInstance.workersPow$.subscribe((data) => {
+    workersPowSub = notemine.workersPow$.subscribe((data) => {
       miningState.update(m => {
         const workersBestPow = Object.values(data);
         return {
@@ -104,7 +104,7 @@
       });
     });
 
-    bestPowSub = notemineInstance.highestPow$.subscribe((data) => {
+    bestPowSub = notemine.highestPow$.subscribe((data) => {
       miningState.update(m => {
         const overallBestPow = data;
         return {
@@ -114,10 +114,10 @@
       });
     });
 
-    progressSub = notemineInstance.progress$.subscribe(() => {
+    progressSub = notemine.progress$.subscribe(() => {
       miningState.update(m => {
         const overallBestPow = m.overallBestPow;
-        const hashRate = notemineInstance.totalHashRate
+        const hashRate = notemine.totalHashRate
         return {
           ...m,
           overallBestPow,
@@ -126,7 +126,7 @@
       });
     });
 
-    successSub = notemineInstance.success$.subscribe(({ result: minedResult }) => {
+    successSub = notemine.success$.subscribe(({ result: minedResult }) => {
       const currentActiveRelays = get(activeRelays);
       miningState.update(m => ({
         ...m,
@@ -136,7 +136,7 @@
       }));
     });
 
-    errorSub = notemineInstance.error$.subscribe(({ error }) => {
+    errorSub = notemine.error$.subscribe(({ error }) => {
       console.error('Mining error:', error);
       miningState.update(m => ({
         ...m,
@@ -145,7 +145,7 @@
       }));
     });
 
-    notemineInstance.mine();
+    notemine.mine();
   }
 
   const resetMiningState = () => {
@@ -160,8 +160,8 @@
   }
 
   function stopMining() {
-    if (notemineInstance) {
-      notemineInstance.cancel();
+    if (notemine) {
+      notemine.cancel();
       resetMiningState();
     }
   }
@@ -174,8 +174,8 @@
     progressSub && progressSub.unsubscribe();
     successSub && successSub.unsubscribe();
     errorSub && errorSub.unsubscribe();
-    if (notemineInstance && get(miningState).mining) {
-      notemineInstance.cancel();
+    if (notemine && get(miningState).mining) {
+      notemine.cancel();
     }
   });
 </script>

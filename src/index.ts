@@ -137,8 +137,8 @@ export class Notemine {
     return this._totalHashRate;
   }
 
-  mine(): void {
-    //console.log('mine()')
+  async mine(): Promise<void> {
+    ////console.log('mine()')
     if (this.mining$.getValue()) return;
 
     if (!this.pubkey) {
@@ -156,7 +156,7 @@ export class Notemine {
     this.workersPow$.next({});
     this.highestPow$.next({});
 
-    this.initializeWorkers();
+    await this.initializeWorkers();
   }
 
   stop(): void {
@@ -173,12 +173,12 @@ export class Notemine {
     this.cancelledEventSubject.next({ reason: 'Mining cancelled by user.' });
   }
 
-  private initializeWorkers(): void {
+  private async initializeWorkers(): Promise<void> {
     try {
-      //console.log('Initializing workers...');
+      ////console.log('Initializing workers...');
       const workers: Worker[] = [];
       for (let i = 0; i < this.numberOfWorkers; i++) {
-        //console.log(`Creating worker ${i}`);
+        ////console.log(`Creating worker ${i}`);
         const worker = MineWorker();
         worker.onmessage = this.handleWorkerMessage.bind(this);
         worker.onerror = this.handleWorkerError.bind(this);
@@ -193,10 +193,11 @@ export class Notemine {
         });
 
         workers.push(worker);
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       this.workers$.next(workers);
-      //console.log(`Initialized ${workers.length} workers.`);
+      ////console.log(`Initialized ${workers.length} workers.`);
     } catch (error) {
       this.errorSubject.next({ error });
       console.error('Error initializing workers:', error);
@@ -207,10 +208,10 @@ export class Notemine {
     const data = e.data;
     const { type, workerId, hashRate } = data;
 
-    //console.log('Message from worker:', data);
+    ////console.log('Message from worker:', data);
 
     if (type === 'initialized') {
-      //console.log(`Worker ${workerId} initialized:`, data.message);
+      ////console.log(`Worker ${workerId} initialized:`, data.message);
     } else if (type === 'progress') {
       let bestPowData: BestPowData | undefined;
 
@@ -221,11 +222,11 @@ export class Notemine {
         workersPow[workerId] = bestPowData;
         this.workersPow$.next(workersPow);
 
-        console.log(`Worker ${workerId} best PoW: ${bestPowData.bestPow}`);
+        //console.log(`Worker ${workerId} best PoW: ${bestPowData.bestPow}`);
 
         const highestPow = this.highestPow$.getValue()
 
-        console.log(`Highest PoW: ${highestPow?.bestPow}`);
+        //console.log(`Highest PoW: ${highestPow?.bestPow}`);
 
         if (!highestPow || (bestPowData && bestPowData.bestPow > (highestPow?.bestPow || 0))) {
           this.highestPow$.next({
@@ -239,7 +240,7 @@ export class Notemine {
 
       this.progressSubject.next({ workerId, hashRate, bestPowData });
     } else if (type === 'result') {
-      //console.log('Mining result received:', data.data);
+      ////console.log('Mining result received:', data.data);
       this.result$.next(data.data);
       this.mining$.next(false);
 
@@ -289,7 +290,7 @@ export class Notemine {
 }
 
   private async recordMaxRate(workerId: number, hashRate: number){
-    console.log(`Worker ${workerId} hash rate: ${Math.round(hashRate/1000)}`);
+    //console.log(`Worker ${workerId} hash rate: ${Math.round(hashRate/1000)}`);
     const maxHashRate = this._workerMaxHashRates.get(workerId);
     if (maxHashRate === undefined || hashRate > maxHashRate) {
       this._workerMaxHashRates.set(workerId, Math.round(hashRate));
@@ -309,7 +310,7 @@ export class Notemine {
         return;
     }
 
-    console.log(`Refreshing hash rate... total: ${this.totalHashRate}`);
+    //console.log(`Refreshing hash rate... total: ${this.totalHashRate}`);
 
     let totalRate = 0;
     this._workerHashRates.forEach((hashRates) => {

@@ -56,7 +56,7 @@
     });
   }
 
-  function startMining() {
+  async function startMining() {
     const currentUser = get(user);
     const currentContent = get(contentState);
 
@@ -65,7 +65,8 @@
       return;
     }
 
-    miningState.update(m => ({ ...m, mining: true, result: 'Mining started...' }));
+    resetMiningState();
+    miningState.update(m => ({ ...m, mining: true }));
 
     notemine = new Notemine({
       content: currentContent.content,
@@ -108,12 +109,15 @@
 
     successSub = notemine.success$.subscribe(async ({ result: minedResult }) => {
       // const currentActiveRelays = get(activeRelays);
-      console.log(`currentActiveRelays: ${$activeRelays}`);
-      await publishEvent(minedResult.event)
+      // //console.log(`currentActiveRelays: ${$activeRelays}`);
       miningState.update(m => ({
         ...m,
         mining: false,
         result: minedResult ? JSON.stringify(minedResult, null, 2) : 'No result received.',
+      }));
+      await publishEvent(minedResult.event)
+      miningState.update(m => ({
+        ...m,
         relayStatus: `Published to relays: ${$activeRelays.join(', ')}`
       }));
     });
@@ -127,7 +131,8 @@
       }));
     });
 
-    notemine.mine();
+    await notemine.mine();
+    console.log('All workers mining.')
   }
 
   const resetMiningState = () => {
@@ -137,7 +142,8 @@
       result: '',
       relayStatus: '',
       hashRate: 0,
-      overallBestPow: null
+      overallBestPow: null,
+      publishSuccessNum: 0
     }));
   }
 

@@ -11,7 +11,7 @@ let workerId: number;
 let miningCancelled = false;
 
 const destructureBestPowData = (data: BestPowDataMap | any): BestPowData => {
-  //console.log('Destructuring bestPowData:', data, typeof data, data.get ? 'has get' : 'no get');
+  ////console.log('Destructuring bestPowData:', data, typeof data, data.get ? 'has get' : 'no get');
 
   let bestPow: number;
   let nonce: string;
@@ -45,13 +45,13 @@ self.postMessage({ type: 'initialized', message: 'Worker initialized successfull
 self.onmessage = async function (e: MessageEvent) {
 
   if (e?.data?.name) {
-    //console.log("Ignoring injected message:", e.data);
+    ////console.log("Ignoring injected message:", e.data);
     return;
   }
-  //console.log('Worker received message:', e.data);
+  ////console.log('Worker received message:', e.data);
   try {
     const { type, event, difficulty, id, totalWorkers } = e.data;
-    //console.log(e.data)
+    ////console.log(e.data)
 
     // return 
 
@@ -66,15 +66,15 @@ self.onmessage = async function (e: MessageEvent) {
       mining = true;
 
       try {
-        //console.log('Initializing WASM...');
+        ////console.log('Initializing WASM...');
         await initWasm(wasm);
-        //console.log('WASM Initialized successfully.');
+        ////console.log('WASM Initialized successfully.');
 
         const startNonce = BigInt(workerId);
         const nonceStep = BigInt(totalWorkers);
 
         const reportProgress = (hashRate: number, bestPowData: any) => {
-          //console.log('Progress:', hashRate, bestPowData);
+          ////console.log('Progress:', hashRate, bestPowData);
           const message: any = {
             type: 'progress',
             workerId,
@@ -86,7 +86,7 @@ self.onmessage = async function (e: MessageEvent) {
 
         const shouldCancel = () => miningCancelled;
 
-        //console.log('Starting mining with event:', event, 'difficulty:', difficulty);
+        ////console.log('Starting mining with event:', event, 'difficulty:', difficulty);
         const minedResult = mine_event(
           event,
           difficulty,
@@ -96,7 +96,7 @@ self.onmessage = async function (e: MessageEvent) {
           shouldCancel
         );
 
-        //console.log('Mining completed successfully:', minedResult);
+        ////console.log('Mining completed successfully:', minedResult);
         self.postMessage({ type: 'result', data: minedResult, workerId });
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
@@ -107,7 +107,7 @@ self.onmessage = async function (e: MessageEvent) {
       }
     } else if (type === 'cancel') {
       miningCancelled = true;
-      //console.log('Mining cancelled by user.');
+      ////console.log('Mining cancelled by user.');
     }
   } catch (err: any) {
     const errorMessage = err.message || 'Unknown error occurred in worker';

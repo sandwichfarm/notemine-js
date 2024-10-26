@@ -6,5 +6,6 @@ export const miningState = writable({
   relayStatus: '',
   hashRate: 0, 
   overallBestPow: null, 
-  workersBestPow: []
+  workersBestPow: [],
+  publishSuccessNum: 0,
 });

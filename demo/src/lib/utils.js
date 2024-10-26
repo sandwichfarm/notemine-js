@@ -17,7 +17,7 @@ export const getPow = (hex) => {
 }
 
 export const verifyPow = (event) => {
-  console.log(event)
+  //console.log(event)
   const hash = getEventHash(event);
   const count = getPow(hash);
   const nonceTag = event.tags.find(tag => tag[0] === 'nonce');

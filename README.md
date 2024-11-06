@@ -1,3 +1,5 @@
+> DEPRECATED! This has been moved to the [notemine monorepo](https://github.com/sandwichfarm/notemine)
+
 # note⛏️ (js)
 
 [![npm](https://img.shields.io/npm/v/notemine)]( https://www.npmjs.com/package/notemine )

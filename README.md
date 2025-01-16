@@ -1,4 +1,4 @@
-> DEPRECATED! This has been moved to the [notemine monorepo](https://github.com/sandwichfarm/notemine) as `@notemine/wrapper` 
+> DEPRECATED! This has been moved to the [notemine monorepo](https://github.com/sandwichfarm/notemine) 
 
 # note⛏️ (js)
 
